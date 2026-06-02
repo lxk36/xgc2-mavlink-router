@@ -75,6 +75,7 @@ fi
 find "${pkg_root}" -type d -exec chmod 0755 {} +
 find "${pkg_root}" -type f -exec chmod 0644 {} +
 chmod 0755 "${pkg_root}/usr/bin/mavlink-routerd"
+strip --strip-unneeded "${pkg_root}/usr/bin/mavlink-routerd" 2>/dev/null || true
 
 cat > "${pkg_root}/DEBIAN/control" <<EOF
 Package: ${PACKAGE}
