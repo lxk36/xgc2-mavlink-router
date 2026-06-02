@@ -44,6 +44,9 @@ case "${UBUNTU_VERSION}" in
   20.04)
     APT_REPO_DISTRIBUTION="focal"
     ;;
+  22.04)
+    APT_REPO_DISTRIBUTION="jammy"
+    ;;
   24.04)
     APT_REPO_DISTRIBUTION="noble"
     ;;
