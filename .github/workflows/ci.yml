@@ -24,7 +24,6 @@ jobs:
 
   build:
     name: debs-${{ matrix.distro }}-${{ matrix.arch }}
-    needs: formatting-check
     strategy:
       fail-fast: false
       matrix:
