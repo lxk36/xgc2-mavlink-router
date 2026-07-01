@@ -1,13 +1,30 @@
-name: build-debs
+name: ci
 
 on:
   push:
     branches:
       - master
+  pull_request:
+    branches:
+      - master
   workflow_dispatch:
 
 jobs:
+  formatting-check:
+    name: formatting-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run clang-format style check on src directory
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: "13"
+          check-path: "src"
+
   build:
+    name: debs-${{ matrix.distro }}-${{ matrix.arch }}
+    needs: formatting-check
     strategy:
       fail-fast: false
       matrix:
@@ -37,12 +54,9 @@ jobs:
             arch: arm64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
-    env:
-      APT_REPO_HOST: ${{ secrets.APT_REPO_HOST }}
-      APT_REPO_PORT: ${{ secrets.APT_REPO_PORT }}
-      APT_REPO_SSH_KEY: ${{ secrets.APT_REPO_SSH_KEY }}
-      APT_REPO_KNOWN_HOSTS: ${{ secrets.APT_REPO_KNOWN_HOSTS }}
-
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,6 +65,7 @@ jobs:
 
       - name: Build and install-check deb package in Docker
         run: |
+          set -euo pipefail
           .xgc2/scripts/build_deb_in_docker.sh \
             --ubuntu-version "${{ matrix.ubuntu_version }}" \
             --work-dir "$RUNNER_TEMP/mavlink-router-${{ matrix.distro }}-${{ matrix.arch }}" \
@@ -61,10 +76,3 @@ jobs:
         with:
           name: xgc2-mavlink-router-${{ matrix.distro }}-${{ matrix.arch }}
           path: debs/*.deb
-
-      - name: Publish to self-hosted APT repository
-        if: ${{ env.APT_REPO_HOST != '' && env.APT_REPO_PORT != '' && env.APT_REPO_SSH_KEY != '' && env.APT_REPO_KNOWN_HOSTS != '' }}
-        run: |
-          .xgc2/scripts/publish_apt_repo.sh \
-            --deb-dir debs \
-            --distribution "${{ matrix.distro }}"
