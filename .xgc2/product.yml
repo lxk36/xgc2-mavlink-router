@@ -1,6 +1,7 @@
 schema: xgc2.product.v1
 id: xgc2-mavlink-router
 name: XGC2 MAVLink Router
+version: 3.0.0-1
 kind: toolchain-apt
 summary: XGC2 fork of mavlink-router packaged as a native Debian executable for Ubuntu 20.04, 22.04, and 24.04.
 
@@ -23,6 +24,12 @@ usage:
   smoke_test: |
     command -v mavlink-routerd
     mavlink-routerd --version
+
+release:
+  apt_versions:
+    focal: 3.0.0-1+focal
+    jammy: 3.0.0-1+jammy
+    noble: 3.0.0-1+noble
 
 ownership:
   paths:
