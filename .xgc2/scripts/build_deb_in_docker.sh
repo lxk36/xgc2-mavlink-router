@@ -42,13 +42,13 @@ done
 
 case "${UBUNTU_VERSION}" in
   20.04)
-    APT_REPO_DISTRIBUTION="focal"
+    PACKAGE_DISTRIBUTION="focal"
     ;;
   22.04)
-    APT_REPO_DISTRIBUTION="jammy"
+    PACKAGE_DISTRIBUTION="jammy"
     ;;
   24.04)
-    APT_REPO_DISTRIBUTION="noble"
+    PACKAGE_DISTRIBUTION="noble"
     ;;
   *)
     echo "unsupported Ubuntu version: ${UBUNTU_VERSION}" >&2
@@ -60,9 +60,10 @@ mkdir -p "${WORK_DIR}" "${OUTPUT_DIR}"
 
 docker pull "${DOCKER_IMAGE}"
 docker run --rm \
+  -e XGC2_APT_OVERLAY_URL="${XGC2_APT_OVERLAY_URL:-}" \
   -e DEBIAN_FRONTEND=noninteractive \
   -e INSTALL_CHECK="${INSTALL_CHECK}" \
-  -e APT_REPO_DISTRIBUTION="${APT_REPO_DISTRIBUTION}" \
+  -e PACKAGE_DISTRIBUTION="${PACKAGE_DISTRIBUTION}" \
   -v "${REPO_ROOT}:/workspace/mavlink-router:ro" \
   -v "${WORK_DIR}:/workspace/work" \
   -v "${OUTPUT_DIR}:/workspace/out" \
@@ -110,7 +111,7 @@ docker run --rm \
     /workspace/mavlink-router/.xgc2/scripts/package_deb.sh \
       --install-root /workspace/work/install-root \
       --output-dir /workspace/out \
-      --distro "${APT_REPO_DISTRIBUTION}"
+      --distro "${PACKAGE_DISTRIBUTION}"
 
     if [[ "${INSTALL_CHECK}" == "true" ]]; then
       apt-get install -y /workspace/out/xgc2-mavlink-router_*.deb
