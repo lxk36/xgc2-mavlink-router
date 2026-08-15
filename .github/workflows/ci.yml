@@ -15,13 +15,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Run clang-format style check on src directory
-        uses: jidicula/clang-format-action@v4.11.0
-        with:
-          clang-format-version: "13"
-          check-path: "src"
-
   build:
     name: debs-${{ matrix.distro }}-${{ matrix.arch }}
     strategy:
@@ -61,6 +54,14 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
+
+
+      - name: Run clang-format style check on src directory
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: "13"
+          check-path: "src"
+
 
       - name: Build and install-check deb package in Docker
         run: |
