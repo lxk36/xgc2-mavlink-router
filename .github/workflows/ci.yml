@@ -15,6 +15,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Run clang-format style check in XGC2 build image
+        run: |
+          set -euo pipefail
+          docker run --rm --network none \
+            -v "$GITHUB_WORKSPACE:/workspace/source:ro" \
+            -w /workspace/source \
+            ghcr.io/xgc-team/xgc2-images/xgc2-build-jammy-dev:1.0.0 \
+            bash -lc '
+              set -euo pipefail
+              mapfile -d "" sources < <(
+                find src -type f \
+                  \( -name "*.c" -o -name "*.cc" -o -name "*.cpp" \
+                     -o -name "*.h" -o -name "*.hh" -o -name "*.hpp" \) \
+                  -print0 | sort -z
+              )
+              test "${#sources[@]}" -gt 0
+              clang-format --dry-run --Werror "${sources[@]}"
+            '
   build:
     name: debs-${{ matrix.distro }}-${{ matrix.arch }}
     strategy:
@@ -54,15 +72,6 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-
-
-      - name: Run clang-format style check on src directory
-        uses: jidicula/clang-format-action@v4.11.0
-        with:
-          clang-format-version: "13"
-          check-path: "src"
-
-
       - name: Build and install-check deb package in Docker
         run: |
           set -euo pipefail

@@ -57,7 +57,6 @@ mkdir -p "${WORK_DIR}" "${OUTPUT_DIR}"
 docker pull "${DOCKER_IMAGE}"
 docker run --rm --network none \
   -e DEBIAN_FRONTEND=noninteractive \
-  -e INSTALL_CHECK="${INSTALL_CHECK}" \
   -e PACKAGE_DISTRIBUTION="${PACKAGE_DISTRIBUTION}" \
   -v "${REPO_ROOT}:/workspace/mavlink-router:ro" \
   -v "${WORK_DIR}:/workspace/work" \
@@ -98,12 +97,22 @@ docker run --rm --network none \
       --install-root /workspace/work/install-root \
       --output-dir /workspace/out \
       --distro "${PACKAGE_DISTRIBUTION}"
-
-    if [[ "${INSTALL_CHECK}" == "true" ]]; then
-      dpkg -i /workspace/out/xgc2-mavlink-router_*.deb
-      /workspace/mavlink-router/.xgc2/scripts/check_installed_package.sh
-    fi
   '
+
+if [[ "${INSTALL_CHECK}" == "true" ]]; then
+  docker run --rm \
+    -e DEBIAN_FRONTEND=noninteractive \
+    -v "${REPO_ROOT}:/workspace/mavlink-router:ro" \
+    -v "${OUTPUT_DIR}:/workspace/out:ro" \
+    "${DOCKER_IMAGE}" \
+    bash -lc '
+      set -euo pipefail
+      apt-get update
+      apt-get install -y --no-install-recommends \
+        /workspace/out/xgc2-mavlink-router_*.deb
+      /workspace/mavlink-router/.xgc2/scripts/check_installed_package.sh
+    '
+fi
 
 echo "Debian package output:"
 find "${OUTPUT_DIR}" -maxdepth 1 -type f -name "*.deb" -print | sort
