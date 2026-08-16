@@ -169,6 +169,7 @@ jobs:
       - name: Build and install-check deb package in Docker
         run: |
           set -euo pipefail
+          install -d "$GITHUB_WORKSPACE/.ci/build-manifests"
           if [[ "${{ inputs.run_source_tests }}" != "true" ]]; then
             echo "build_deb_in_docker.sh does not expose a switch to skip Meson tests; running the existing package/test/deb path." >&2
           fi

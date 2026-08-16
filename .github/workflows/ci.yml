@@ -75,6 +75,7 @@ jobs:
       - name: Build and install-check deb package in Docker
         run: |
           set -euo pipefail
+          install -d "$GITHUB_WORKSPACE/.ci/build-manifests"
           .xgc2/scripts/build_deb_in_docker.sh \
             --ubuntu-version "${{ matrix.ubuntu_version }}" \
             --work-dir "$RUNNER_TEMP/mavlink-router-${{ matrix.distro }}-${{ matrix.arch }}" \
